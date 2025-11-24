@@ -1,0 +1,308 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}
+    {% trans "تولید گزارش مشتری" %} - {{ block.super }}
+{% endblock %}
+
+{% block extrastyle %}
+    <style>
+        .generate-report-form {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 30px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .generate-report-form h2 {
+            text-align: right;
+            margin-top: 0;
+            margin-bottom: 30px;
+            color: #333;
+            font-size: 20px;
+            border-bottom: 2px solid #417690;
+            padding-bottom: 10px;
+        }
+        .form-section {
+            margin-bottom: 25px;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 20px;
+        }
+        .form-section:last-of-type {
+            border-bottom: none;
+        }
+        .form-section-title {
+            font-weight: 600;
+            color: #666;
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            padding-right: 0;
+        }
+        .form-row {
+            margin-bottom: 20px;
+        }
+        .form-row label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+            text-align: right;
+            font-size: 14px;
+        }
+        .form-row input,
+        .form-row select {
+            width: 100%;
+            padding: 12px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+            direction: rtl;
+            text-align: right;
+            font-family: inherit;
+            min-height: 45px;
+            background-color: white;
+            color: #333;
+        }
+        .form-row input:focus,
+        .form-row select:focus {
+            outline: none;
+            border-color: #417690;
+            box-shadow: 0 0 0 2px rgba(65, 118, 144, 0.2);
+            background-color: white;
+        }
+        .form-row.date-section {
+            border: 1px solid #f0f0f0;
+            padding: 15px;
+            border-radius: 4px;
+            background-color: #fafafa;
+        }
+        .date-toggle {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            direction: rtl;
+        }
+        .date-toggle input[type="checkbox"] {
+            width: auto;
+            margin-left: 10px;
+        }
+        .date-toggle label {
+            margin: 0;
+            margin-right: 10px;
+        }
+        .date-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .single-date-input {
+            display: none;
+        }
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 35px;
+            justify-content: flex-end;
+        }
+        .form-actions button,
+        .form-actions a {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+        }
+        .form-actions .submit-btn {
+            background-color: #417690;
+            color: white;
+            border: 1px solid #417690;
+        }
+        .form-actions .submit-btn:hover {
+            background-color: #2f5370;
+            border-color: #2f5370;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-actions .cancel-btn {
+            background-color: #f8f9fa;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+        .form-actions .cancel-btn:hover {
+            background-color: #e9ecef;
+            border-color: #999;
+        }
+        .help-text {
+            font-size: 12px;
+            color: #999;
+            margin-top: 6px;
+            text-align: right;
+        }
+        #id_use_date_range {
+            width: auto;
+            height: auto;
+        }
+    </style>
+    <script>
+        function toggleDateFields() {
+            const checkbox = document.getElementById('id_use_date_range');
+            const singleDateDiv = document.querySelector('.single-date-input');
+            const dateRangeDiv = document.querySelector('.date-range-input');
+            
+            if (checkbox.checked) {
+                singleDateDiv.style.display = 'none';
+                dateRangeDiv.style.display = 'grid';
+            } else {
+                singleDateDiv.style.display = 'block';
+                dateRangeDiv.style.display = 'none';
+            }
+        }
+        
+        function loadServices() {
+            const category = document.getElementById('id_service_category').value;
+            const serviceIdField = document.getElementById('id_service_id');
+            
+            if (!category) {
+                serviceIdField.innerHTML = '<option value="">{% trans "انتخاب دسته‌بندی‌ابتدا" %}</option>';
+                return;
+            }
+            
+            fetch('{% url "admin:reports_customerreport_api_services" %}?category=' + category)
+                .then(response => response.json())
+                .then(data => {
+                    const services = data.services || [];
+                    serviceIdField.innerHTML = '<option value="">{% trans "تمام خدمات" %}</option>';
+                    services.forEach(service => {
+                        const option = document.createElement('option');
+                        option.value = service.id;
+                        option.textContent = service.name;
+                        serviceIdField.appendChild(option);
+                    });
+                });
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleDateFields();
+            document.getElementById('id_use_date_range').addEventListener('change', toggleDateFields);
+            document.getElementById('id_service_category').addEventListener('change', loadServices);
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+<div class="generate-report-form">
+    <h2>{% trans "تولید گزارش مشتری" %}</h2>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-section">
+            <div class="form-section-title">{% trans "فیلتر مشتری" %}</div>
+            <div class="form-row">
+                <label for="id_customer">{% trans "مشتری:" %}</label>
+                <select name="customer" id="id_customer">
+                    <option value="">{% trans "تمام مشتریان" %}</option>
+                    {% for customer in customers %}
+                        <option value="{{ customer.id }}">{{ customer.get_full_name }}</option>
+                    {% endfor %}
+                </select>
+                <div class="help-text">{% trans "برای فیلتر کردن بر اساس یک مشتری خاص انتخاب کنید" %}</div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="form-section-title">{% trans "فیلتر خدمات" %}</div>
+            <div class="form-row">
+                <label for="id_service_category">{% trans "دسته‌بندی خدمت:" %}</label>
+                <select name="service_category" id="id_service_category">
+                    {% for value, label in service_categories %}
+                        <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <div class="help-text">{% trans "دسته‌بندی خدمت را انتخاب کنید" %}</div>
+            </div>
+            
+            <div class="form-row">
+                <label for="id_service_id">{% trans "خدمت:" %}</label>
+                <select name="service_id" id="id_service_id">
+                    <option value="">{% trans "تمام خدمات" %}</option>
+                </select>
+                <div class="help-text">{% trans "خدمت مخصوص را انتخاب کنید (اختیاری)" %}</div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="form-section-title">{% trans "فیلتر نوع فاکتور و تسویه" %}</div>
+            <div class="form-row">
+                <label for="id_invoice_type">{% trans "نوع فاکتور:" %}</label>
+                <select name="invoice_type" id="id_invoice_type">
+                    <option value="all">{% trans "هر دو" %}</option>
+                    <option value="sales">{% trans "فقط فاکتور فروش" %}</option>
+                    <option value="purchase">{% trans "فقط فاکتور خرید" %}</option>
+                </select>
+                <div class="help-text">{% trans "نوع فاکتور را انتخاب کنید" %}</div>
+            </div>
+            
+            <div class="form-row">
+                <label for="id_settlement_type">{% trans "نوع تسویه:" %}</label>
+                <select name="settlement_type" id="id_settlement_type">
+                    <option value="all">{% trans "هر دو" %}</option>
+                    <option value="cash">{% trans "نقدی" %}</option>
+                    <option value="conditional">{% trans "شرایطی" %}</option>
+                </select>
+                <div class="help-text">{% trans "نوع تسویه را انتخاب کنید" %}</div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="form-section-title">{% trans "فیلتر تاریخ" %}</div>
+            <div class="form-row date-section">
+                <div class="date-toggle">
+                    <input type="checkbox" name="use_date_range" id="id_use_date_range">
+                    <label for="id_use_date_range">{% trans "استفاده از بازه تاریخی" %}</label>
+                </div>
+                
+                <div class="single-date-input">
+                    <label for="id_single_date">{% trans "تاریخ:" %}</label>
+                    <input type="date" name="single_date" id="id_single_date">
+                    <div class="help-text">{% trans "یک تاریخ مشخص انتخاب کنید" %}</div>
+                </div>
+                
+                <div class="date-range-input" style="display: none;">
+                    <label for="id_start_date">{% trans "تاریخ شروع:" %}</label>
+                    <input type="date" name="start_date" id="id_start_date">
+                    
+                    <label for="id_end_date">{% trans "تاریخ پایان:" %}</label>
+                    <input type="date" name="end_date" id="id_end_date">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="form-section-title">{% trans "فیلتر کاربر" %}</div>
+            <div class="form-row">
+                <label for="id_created_by">{% trans "کاربر ثبت‌کننده:" %}</label>
+                <select name="created_by" id="id_created_by">
+                    <option value="">{% trans "تمام کاربران" %}</option>
+                    {% for user in users %}
+                        <option value="{{ user.id }}">{{ user.get_display_name }}</option>
+                    {% endfor %}
+                </select>
+                <div class="help-text">{% trans "برای فیلتر کردن بر اساس کاربری که فاکتور را ثبت کرده انتخاب کنید" %}</div>
+            </div>
+        </div>
+        
+        <div class="form-actions">
+            <a href="{% url 'admin:reports_customerreport_changelist' %}" class="cancel-btn">{% trans "لغو" %}</a>
+            <button type="submit" class="submit-btn">{% trans "تولید گزارش" %}</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

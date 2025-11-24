@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "نتایج گزارش مشتری" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-chart-bar"></i>
+                        {% trans "نتایج گزارش مشتری" %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>{% trans "مشتری:" %}</strong>
+                            {% if report.customer %}
+                                {{ report.customer.get_full_name }}
+                                <span class="text-muted small">({{ report.customer.national_id }})</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{% trans "همه مشتریان" %}</span>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>{% trans "دسته‌بندی خدمت:" %}</strong>
+                            {{ report.get_service_category_display }}
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>{% trans "نوع فاکتور:" %}</strong>
+                            {{ report.get_invoice_type_display }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>{% trans "نوع تسویه:" %}</strong>
+                            {{ report.get_settlement_type_display }}
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>{% trans "دوره زمانی:" %}</strong>
+                            {% if report.single_date %}
+                                {{ report.single_date }}
+                            {% elif report.start_date and report.end_date %}
+                                {{ report.start_date }} - {{ report.end_date }}
+                            {% else %}
+                                <span class="badge bg-secondary">{% trans "تمام دوره‌ها" %}</span>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>{% trans "کاربر ثبت‌کننده:" %}</strong>
+                            {% if report.created_by %}
+                                {{ report.created_by.get_display_name }}
+                            {% else %}
+                                <span class="badge bg-secondary">{% trans "تمام کاربران" %}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <strong>{% trans "تعداد نتایج:" %}</strong> {{ total_count }}
+            </div>
+        </div>
+    </div>
+
+    {% if invoices %}
+        <div class="row">
+            <div class="col-12">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>{% trans "شماره پرونده" %}</th>
+                                <th>{% trans "تاریخ" %}</th>
+                                <th>{% trans "نام" %}</th>
+                                <th>{% trans "نام خانوادگی" %}</th>
+                                <th>{% trans "نوع" %}</th>
+                                <th>{% trans "دسته خدمات" %}</th>
+                                <th>{% trans "خدمت" %}</th>
+                                <th>{% trans "نوع تسویه" %}</th>
+                                <th>{% trans "مبلغ" %}</th>
+                                <th>{% trans "کاربر ثبت‌کننده" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for invoice in invoices %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ invoice.invoice_number }}</strong>
+                                    </td>
+                                    <td>{{ invoice.invoice_date }}</td>
+                                    <td>{{ invoice.customer_first_name }}</td>
+                                    <td>{{ invoice.customer_last_name }}</td>
+                                    <td>
+                                        {% if invoice.type == 'فروش' %}
+                                            <span class="badge bg-success">{{ invoice.type }}</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">{{ invoice.type }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ invoice.service_category }}</td>
+                                    <td>{{ invoice.service_name }}</td>
+                                    <td>{{ invoice.settlement_type }}</td>
+                                    <td>
+                                        <strong>{{ invoice.price|floatformat:2 }}</strong>
+                                    </td>
+                                    <td>{{ invoice.created_by }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <a href="{% url 'admin:reports_customerreport_changelist' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i>
+                    {% trans "بازگشت" %}
+                </a>
+                <button onclick="window.print()" class="btn btn-primary">
+                    <i class="fas fa-print"></i>
+                    {% trans "چاپ" %}
+                </button>
+            </div>
+        </div>
+    {% else %}
+        <div class="row">
+            <div class="col-12">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    {% trans "هیچ نتیجه‌ای برای این فیلترها پیدا نشد" %}
+                </div>
+                <a href="{% url 'admin:reports_customerreport_changelist' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i>
+                    {% trans "بازگشت" %}
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    .table th {
+        text-align: right;
+        white-space: nowrap;
+    }
+    
+    .table td {
+        text-align: right;
+        vertical-align: middle;
+    }
+    
+    .card-header {
+        padding: 1rem;
+    }
+    
+    @media print {
+        .btn, .alert-info {
+            display: none;
+        }
+        
+        table {
+            font-size: 0.9rem;
+        }
+    }
+</style>
+{% endblock %}

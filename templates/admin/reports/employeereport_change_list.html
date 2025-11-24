@@ -1,0 +1,59 @@
+{% extends "admin/change_list.html" %}
+{% load i18n admin_urls static %}
+
+{% block object_tools %}
+    <div id="toolbar">
+        <ul>
+            {% if generate_report_url %}
+                <li>
+                    <a href="{{ generate_report_url }}" class="addlink">
+                        {% trans "تولید گزارش کارمند جدید" %}
+                    </a>
+                </li>
+            {% endif %}
+            {{ block.super }}
+        </ul>
+    </div>
+{% endblock %}
+
+{% block search %}
+    <div id="toolbar">
+        <form id="changelist-search" method="get">
+            <div>
+                <label for="searchbar"><img src="{% static "admin/img/search.svg" %}" alt="Search"></label>
+                <input type="text" size="40" name="q" value="{{ cl.query }}" id="searchbar" autofocus placeholder="{% trans 'جستجو' %}">
+                <input type="submit" value="{% trans 'جستجو' %}">
+            </div>
+        </form>
+        <div class="generate-report-btn-wrapper">
+            {% if generate_report_url %}
+                <a href="{{ generate_report_url }}" class="button">{% trans "تولید گزارش جدید" %}</a>
+            {% endif %}
+        </div>
+    </div>
+    <style>
+        #toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        #toolbar form {
+            flex: 1;
+        }
+        .generate-report-btn-wrapper {
+            margin-left: 10px;
+        }
+        .generate-report-btn-wrapper .button {
+            padding: 10px 20px;
+            background-color: #417690;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .generate-report-btn-wrapper .button:hover {
+            background-color: #2f5370;
+        }
+    </style>
+{% endblock %}

@@ -1,0 +1,83 @@
+from django.shortcuts import render
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse_lazy
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q
+from .models import Person, SalesInvoice
+from .forms import PersonForm, SalesInvoiceForm
+
+
+@require_http_methods(["GET"])
+@csrf_exempt
+def get_services_by_category(request):
+    service_type = request.GET.get('service_type')
+    if not service_type:
+        return JsonResponse({'error': 'service_type is required'}, status=400)
+    
+    try:
+        from services.models import (
+            CommercialService,
+            RegistrationService,
+            LegalService,
+            LeasingService,
+            LoanService
+        )
+        
+        model_map = {
+            'commercial': CommercialService,
+            'registration': RegistrationService,
+            'legal': LegalService,
+            'leasing': LeasingService,
+            'loan': LoanService,
+        }
+        
+        model = model_map.get(service_type)
+        if not model:
+            return JsonResponse({'error': 'Invalid service_type'}, status=400)
+        
+        if service_type == 'loan':
+            services_qs = model.objects.filter(is_active=True).order_by('bank_name', 'plan_name')
+            services = [{'id': s.id, 'name': str(s)} for s in services_qs]
+        else:
+            services = list(model.objects.filter(
+                is_active=True
+            ).values('id', 'name').order_by('name'))
+        
+        return JsonResponse({
+            'success': True,
+            'services': services
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@require_http_methods(["GET"])
+@csrf_exempt
+def search_persons(request):
+    query = request.GET.get('q', '').strip()
+    if not query or len(query) < 2:
+        return JsonResponse({'results': []})
+    
+    try:
+        persons = Person.objects.filter(
+            is_active=True
+        ).filter(
+            Q(first_name__icontains=query) |
+            Q(last_name__icontains=query) |
+            Q(national_id__icontains=query) |
+            Q(phone_number__icontains=query)
+        ).values('id', 'first_name', 'last_name', 'national_id', 'phone_number')[:10]
+        
+        results = []
+        for person in persons:
+            results.append({
+                'id': person['id'],
+                'text': f"{person['first_name']} {person['last_name']} ({person['national_id']})"
+            })
+        
+        return JsonResponse({'results': results})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

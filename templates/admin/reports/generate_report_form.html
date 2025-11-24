@@ -1,0 +1,160 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}
+    {% trans "تولید گزارش کارمند" %} - {{ block.super }}
+{% endblock %}
+
+{% block extrastyle %}
+    <style>
+        .generate-report-form {
+            max-width: 500px;
+            margin: 40px auto;
+            padding: 30px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .generate-report-form h2 {
+            text-align: right;
+            margin-top: 0;
+            margin-bottom: 30px;
+            color: #333;
+            font-size: 20px;
+            border-bottom: 2px solid #417690;
+            padding-bottom: 10px;
+        }
+        .form-row {
+            margin-bottom: 25px;
+        }
+        .form-row label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: #333;
+            text-align: right;
+            font-size: 14px;
+        }
+        .form-row input,
+        .form-row select {
+            width: 100%;
+            padding: 12px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+            direction: rtl;
+            text-align: right;
+            font-family: inherit;
+            min-height: 45px;
+            background-color: white;
+            color: #333;
+        }
+        .form-row select {
+            min-height: 100px;
+            padding: 10px;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/csvg%3e");
+            background-repeat: no-repeat;
+            background-position: left 10px center;
+            background-size: 1.5em 1.5em;
+            padding-left: 35px;
+        }
+        .form-row select option {
+            background-color: white;
+            color: #333;
+            padding: 10px;
+            font-size: 14px;
+        }
+        .form-row input:focus,
+        .form-row select:focus {
+            outline: none;
+            border-color: #417690;
+            box-shadow: 0 0 0 2px rgba(65, 118, 144, 0.2);
+            background-color: white;
+        }
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 35px;
+            justify-content: flex-end;
+        }
+        .form-actions button,
+        .form-actions a {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+        }
+        .form-actions .submit-btn {
+            background-color: #417690;
+            color: white;
+            border: 1px solid #417690;
+        }
+        .form-actions .submit-btn:hover {
+            background-color: #2f5370;
+            border-color: #2f5370;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-actions .cancel-btn {
+            background-color: #f8f9fa;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+        .form-actions .cancel-btn:hover {
+            background-color: #e9ecef;
+            border-color: #999;
+        }
+        .help-text {
+            font-size: 12px;
+            color: #999;
+            margin-top: 6px;
+            text-align: right;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="generate-report-form">
+    <h2>{% trans "تولید گزارش فعالیت کارمند" %}</h2>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-row">
+            <label for="employee">{% trans "انتخاب کارمند:" %}</label>
+            <select name="employee" id="employee" required>
+                <option value="">{% trans "-- انتخاب کنید --" %}</option>
+                {% for employee in employees %}
+                    <option value="{{ employee.id }}">{{ employee.get_display_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-row">
+            <label for="start_date">{% trans "تاریخ شروع:" %}</label>
+            <input type="date" name="start_date" id="start_date" required>
+            <div class="help-text">{% trans "بازه تاریخی را برای گزارش انتخاب کنید" %}</div>
+        </div>
+        
+        <div class="form-row">
+            <label for="end_date">{% trans "تاریخ پایان:" %}</label>
+            <input type="date" name="end_date" id="end_date" required>
+            <div class="help-text">{% trans "تاریخ پایان باید بعد از تاریخ شروع باشد" %}</div>
+        </div>
+        
+        <div class="form-actions">
+            <a href="{% url 'admin:reports_employeereport_changelist' %}" class="cancel-btn">{% trans "لغو" %}</a>
+            <button type="submit" class="submit-btn">{% trans "تولید گزارش" %}</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,255 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "گزارش مشتری" %}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">{% trans "تولید گزارش مشتری" %}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'reports:customer_report_form' %}">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="form-section mb-4">
+                            <h5 class="mb-3">
+                                <i class="fas fa-user"></i>
+                                {% trans "فیلتر مشتری" %}
+                            </h5>
+                            <div class="form-group">
+                                <label for="{{ form.customer.id_for_label }}">
+                                    {{ form.customer.label }}
+                                </label>
+                                {{ form.customer }}
+                                {% if form.customer.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.customer.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="form-section mb-4">
+                            <h5 class="mb-3">
+                                <i class="fas fa-briefcase"></i>
+                                {% trans "فیلتر خدمات" %}
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.service_category.id_for_label }}">
+                                            {{ form.service_category.label }}
+                                        </label>
+                                        {{ form.service_category }}
+                                        {% if form.service_category.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ form.service_category.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.service_id.id_for_label }}">
+                                            {{ form.service_id.label }}
+                                        </label>
+                                        {{ form.service_id }}
+                                        {% if form.service_id.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ form.service_id.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section mb-4">
+                            <h5 class="mb-3">
+                                <i class="fas fa-filter"></i>
+                                {% trans "فیلتر فاکتور و تسویه" %}
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.invoice_type.id_for_label }}">
+                                            {{ form.invoice_type.label }}
+                                        </label>
+                                        {{ form.invoice_type }}
+                                        {% if form.invoice_type.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ form.invoice_type.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.settlement_type.id_for_label }}">
+                                            {{ form.settlement_type.label }}
+                                        </label>
+                                        {{ form.settlement_type }}
+                                        {% if form.settlement_type.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ form.settlement_type.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section mb-4">
+                            <h5 class="mb-3">
+                                <i class="fas fa-calendar"></i>
+                                {% trans "فیلتر تاریخ" %}
+                            </h5>
+                            
+                            <div class="form-group mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" 
+                                           id="use_date_range" name="use_date_range" 
+                                           {% if form.use_date_range.value %}checked{% endif %}>
+                                    <label class="form-check-label" for="use_date_range">
+                                        {{ form.use_date_range.label }}
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div id="date_range_section" style="display: none;">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="{{ form.start_date.id_for_label }}">
+                                                {{ form.start_date.label }}
+                                            </label>
+                                            {{ form.start_date }}
+                                            {% if form.start_date.errors %}
+                                                <div class="text-danger small mt-1">
+                                                    {{ form.start_date.errors }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="{{ form.end_date.id_for_label }}">
+                                                {{ form.end_date.label }}
+                                            </label>
+                                            {{ form.end_date }}
+                                            {% if form.end_date.errors %}
+                                                <div class="text-danger small mt-1">
+                                                    {{ form.end_date.errors }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="single_date_section">
+                                <div class="form-group">
+                                    <label for="{{ form.single_date.id_for_label }}">
+                                        {{ form.single_date.label }} ({% trans "اختیاری" %})
+                                    </label>
+                                    {{ form.single_date }}
+                                    {% if form.single_date.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {{ form.single_date.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section mb-4">
+                            <h5 class="mb-3">
+                                <i class="fas fa-user-tie"></i>
+                                {% trans "فیلتر کاربر ثبت‌کننده" %}
+                            </h5>
+                            <div class="form-group">
+                                <label for="{{ form.created_by.id_for_label }}">
+                                    {{ form.created_by.label }}
+                                </label>
+                                {{ form.created_by }}
+                                {% if form.created_by.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.created_by.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-file-alt"></i>
+                                {% trans "تولید گزارش" %}
+                            </button>
+                            <a href="{% url 'admin:reports_customerreport_changelist' %}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times"></i>
+                                {% trans "انصراف" %}
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-section {
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        border-right: 3px solid #007bff;
+    }
+    
+    .form-section h5 {
+        color: #007bff;
+        font-weight: 600;
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const checkbox = document.getElementById('use_date_range');
+        const dateRangeSection = document.getElementById('date_range_section');
+        const singleDateSection = document.getElementById('single_date_section');
+        
+        function updateDateDisplay() {
+            if (checkbox.checked) {
+                dateRangeSection.style.display = 'block';
+                singleDateSection.style.display = 'none';
+            } else {
+                dateRangeSection.style.display = 'none';
+                singleDateSection.style.display = 'block';
+            }
+        }
+        
+        checkbox.addEventListener('change', updateDateDisplay);
+        updateDateDisplay();
+    });
+</script>
+{% endblock %}

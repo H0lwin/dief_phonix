@@ -1,0 +1,314 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}
+    {% trans "گزارش مشتری" %} - {{ block.super }}
+{% endblock %}
+
+{% block extrastyle %}
+    <style>
+        #content {
+            direction: rtl;
+        }
+        .report-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .report-header {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 30px;
+            padding: 25px;
+        }
+        .report-header h1 {
+            margin: 0 0 20px 0;
+            color: #333;
+            font-size: 24px;
+            text-align: right;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #417690;
+        }
+        .report-info-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .report-info-item {
+            text-align: right;
+        }
+        .report-info-label {
+            display: block;
+            font-weight: 600;
+            color: #666;
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        .report-info-value {
+            display: block;
+            color: #333;
+            font-size: 16px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 25px;
+        }
+        .stat-box {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 20px;
+            text-align: center;
+        }
+        .stat-box h3 {
+            margin: 0 0 15px 0;
+            color: #666;
+            font-size: 12px;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .stat-box .number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #417690;
+        }
+        .back-link {
+            margin-bottom: 20px;
+        }
+        .back-link a {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #f8f9fa;
+            color: #333;
+            text-decoration: none;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .back-link a:hover {
+            background-color: #e9ecef;
+            border-color: #999;
+        }
+        .section-header {
+            background-color: #417690;
+            color: white;
+            padding: 15px 20px;
+            margin-top: 35px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 16px;
+            text-align: right;
+        }
+        .filter-info {
+            background-color: #f8f9fa;
+            border-left: 4px solid #417690;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            text-align: right;
+        }
+        .filter-info h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        .filter-info ul {
+            margin: 0;
+            padding-right: 20px;
+            list-style-position: inside;
+        }
+        .filter-info li {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .report-table th {
+            background-color: #e9ecef;
+            color: #333;
+            padding: 15px;
+            text-align: right;
+            font-weight: 600;
+            border-bottom: 2px solid #ddd;
+            font-size: 13px;
+        }
+        .report-table td {
+            padding: 12px 15px;
+            text-align: right;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+        .report-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        .report-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .invoice-type-sales {
+            background-color: #f0f8f5;
+        }
+        .invoice-type-purchase {
+            background-color: #fffaf0;
+        }
+        .type-sales {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 4px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+        }
+        .type-purchase {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 4px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+        }
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-style: italic;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="report-container">
+    <div class="back-link">
+        <a href="{% url 'admin:reports_customerreport_changelist' %}">← {% trans "بازگشت به لیست گزارش‌ها" %}</a>
+    </div>
+
+    <div class="report-header">
+        <h1>{% trans "گزارش مشتری" %}</h1>
+        
+        <div class="report-info-row">
+            <div class="report-info-item">
+                <span class="report-info-label">{% trans "مشتری" %}</span>
+                <span class="report-info-value">
+                    {% if report.customer %}
+                        {{ report.customer.get_full_name }}
+                    {% else %}
+                        {% trans "تمام مشتریان" %}
+                    {% endif %}
+                </span>
+            </div>
+            <div class="report-info-item">
+                <span class="report-info-label">{% trans "تاریخ تولید" %}</span>
+                <span class="report-info-value">{{ report.generated_at|date:"Y-m-d H:i" }}</span>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-box">
+                <h3>{% trans "تعداد فاکتورها" %}</h3>
+                <div class="number">{{ total_count }}</div>
+            </div>
+            <div class="stat-box">
+                <h3>{% trans "کل مبلغ" %}</h3>
+                <div class="number">{{ total_price|floatformat:0 }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="filter-info">
+        <h4>{% trans "فیلترهای اعمال شده:" %}</h4>
+        <ul>
+            {% if report.customer %}
+                <li><strong>{% trans "مشتری:" %}</strong> {{ report.customer.get_full_name }}</li>
+            {% endif %}
+            {% if report.service_category %}
+                <li><strong>{% trans "دسته‌بندی خدمت:" %}</strong> {{ report.get_service_category_display }}</li>
+            {% endif %}
+            {% if report.service_id %}
+                <li><strong>{% trans "خدمت:" %}</strong> شناسه {{ report.service_id }}</li>
+            {% endif %}
+            {% if report.invoice_type != 'all' %}
+                <li><strong>{% trans "نوع فاکتور:" %}</strong> {{ report.get_invoice_type_display }}</li>
+            {% endif %}
+            {% if report.settlement_type != 'all' %}
+                <li><strong>{% trans "نوع تسویه:" %}</strong> {{ report.get_settlement_type_display }}</li>
+            {% endif %}
+            {% if report.single_date %}
+                <li><strong>{% trans "تاریخ:" %}</strong> {{ report.single_date }}</li>
+            {% elif report.start_date and report.end_date %}
+                <li><strong>{% trans "بازه تاریخی:" %}</strong> {{ report.start_date }} {% trans "تا" %} {{ report.end_date }}</li>
+            {% endif %}
+            {% if report.created_by %}
+                <li><strong>{% trans "کاربر ثبت‌کننده:" %}</strong> {{ report.created_by.get_display_name }}</li>
+            {% endif %}
+        </ul>
+    </div>
+
+    {% if invoices %}
+        <div class="section-header">
+            💼 {% trans "جزئیات فاکتورها" %} ({{ total_count }} {% trans "فاکتور" %})
+        </div>
+        <table class="report-table">
+            <thead>
+                <tr>
+                    <th>{% trans "شماره فاکتور" %}</th>
+                    <th>{% trans "نوع" %}</th>
+                    <th>{% trans "تاریخ" %}</th>
+                    <th>{% trans "نام مشتری" %}</th>
+                    <th>{% trans "نام خانوادگی مشتری" %}</th>
+                    <th>{% trans "دسته‌بندی خدمت" %}</th>
+                    <th>{% trans "نام خدمت" %}</th>
+                    <th>{% trans "نوع تسویه" %}</th>
+                    <th>{% trans "مبلغ" %}</th>
+                    <th>{% trans "کاربر ثبت‌کننده" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for invoice in invoices %}
+                    <tr class="{% if invoice.type == 'فروش' %}invoice-type-sales{% else %}invoice-type-purchase{% endif %}">
+                        <td><strong>{{ invoice.invoice_number }}</strong></td>
+                        <td>
+                            {% if invoice.type == 'فروش' %}
+                                <span class="type-sales">{% trans "فروش" %}</span>
+                            {% else %}
+                                <span class="type-purchase">{% trans "خرید" %}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ invoice.invoice_date }}</td>
+                        <td>{{ invoice.customer_first_name }}</td>
+                        <td>{{ invoice.customer_last_name }}</td>
+                        <td>{{ invoice.service_category }}</td>
+                        <td>{{ invoice.service_name }}</td>
+                        <td>{{ invoice.settlement_type }}</td>
+                        <td><strong>{{ invoice.price|floatformat:0 }}</strong></td>
+                        <td>{{ invoice.created_by }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="section-header">
+            💼 {% trans "جزئیات فاکتورها" %}
+        </div>
+        <div class="no-data">
+            {% trans "هیچ فاکتوری با معیارهای انتخاب شده یافت نشد" %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

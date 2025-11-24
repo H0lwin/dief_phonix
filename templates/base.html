@@ -1,0 +1,52 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}پنل داشبورد فونیکس{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <header class="header">
+        <nav class="navbar">
+            <div class="navbar-brand">
+                <h1>سیستم مدیریت فونیکس</h1>
+            </div>
+            <ul class="navbar-menu">
+                {% if user.is_authenticated %}
+                    {% if user.is_superuser %}
+                        <li><a href="{% url 'admin:index' %}">پنل مدیریت</a></li>
+                        <li><a href="/superuser-admin/">پنل سوپر ادمین</a></li>
+                    {% elif user.is_staff %}
+                        <li><a href="/user-admin/">پنل ادمین</a></li>
+                    {% endif %}
+                    <li><a href="{% url 'accounts:logout' %}">خروج ({{ user.username }})</a></li>
+                {% else %}
+                    <li><a href="{% url 'accounts:login' %}">ورود</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2024 سیستم مدیریت فونیکس. تمام حقوق محفوظ است.</p>
+    </footer>
+
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
