@@ -4,18 +4,21 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.db.models import Q
 from .models import Person, SalesInvoice
 from .forms import PersonForm, SalesInvoiceForm
 
 
 @require_http_methods(["GET"])
-@csrf_exempt
+@ensure_csrf_cookie
 def get_services_by_category(request):
     service_type = request.GET.get('service_type')
     if not service_type:
         return JsonResponse({'error': 'service_type is required'}, status=400)
+    
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
     
     try:
         from services.models import (
@@ -51,15 +54,18 @@ def get_services_by_category(request):
             'services': services
         })
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
+        return JsonResponse({'error': 'Server error occurred'}, status=500)
 
 
 @require_http_methods(["GET"])
-@csrf_exempt
+@ensure_csrf_cookie
 def search_persons(request):
     query = request.GET.get('q', '').strip()
     if not query or len(query) < 2:
         return JsonResponse({'results': []})
+    
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
     
     try:
         persons = Person.objects.filter(
@@ -80,4 +86,4 @@ def search_persons(request):
         
         return JsonResponse({'results': results})
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
+        return JsonResponse({'error': 'Server error occurred'}, status=500)

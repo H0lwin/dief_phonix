@@ -1,3 +1,14 @@
 Django==4.2.7
 mysqlclient==2.2.0
 python-decouple==3.8
+factory-boy==3.3.0
+faker==21.0.0
+pytest==7.4.3
+pytest-django==4.7.0
+django-cors-headers==4.3.1
+django-csp==3.7
+django-ratelimit==4.1.0
+cryptography==41.0.7
+sqlparse==0.4.4
+gunicorn==21.2.0
+whitenoise==6.6.0
