@@ -1,188 +1,12 @@
 {% extends "admin/base_site.html" %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block title %}
     {% trans "گزارش فعالیت کارمند" %} - {{ block.super }}
 {% endblock %}
 
 {% block extrastyle %}
-    <style>
-        #content {
-            direction: rtl;
-        }
-        .report-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .report-header {
-            background-color: #f8f9fa;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            margin-bottom: 30px;
-            padding: 25px;
-        }
-        .report-header h1 {
-            margin: 0 0 20px 0;
-            color: #333;
-            font-size: 24px;
-            text-align: right;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #417690;
-        }
-        .report-info-row {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin-top: 20px;
-        }
-        .report-info-item {
-            text-align: right;
-        }
-        .report-info-label {
-            display: block;
-            font-weight: 600;
-            color: #666;
-            font-size: 12px;
-            text-transform: uppercase;
-            margin-bottom: 6px;
-        }
-        .report-info-value {
-            display: block;
-            color: #333;
-            font-size: 16px;
-        }
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-top: 25px;
-        }
-        .stat-box {
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 20px;
-            text-align: center;
-        }
-        .stat-box h3 {
-            margin: 0 0 15px 0;
-            color: #666;
-            font-size: 12px;
-            text-transform: uppercase;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-        .stat-box .number {
-            font-size: 32px;
-            font-weight: bold;
-            color: #417690;
-        }
-        .salary-paid {
-            background-color: #d4edda;
-            color: #155724;
-            padding: 3px 8px;
-            border-radius: 3px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-        .salary-unpaid {
-            background-color: #f8d7da;
-            color: #721c24;
-            padding: 3px 8px;
-            border-radius: 3px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-        .back-link {
-            margin-bottom: 20px;
-        }
-        .back-link a {
-            display: inline-block;
-            padding: 10px 15px;
-            background-color: #f8f9fa;
-            color: #333;
-            text-decoration: none;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-        .back-link a:hover {
-            background-color: #e9ecef;
-            border-color: #999;
-        }
-        .section-header {
-            background-color: #417690;
-            color: white;
-            padding: 15px 20px;
-            margin-top: 35px;
-            margin-bottom: 20px;
-            border-radius: 4px;
-            font-weight: 600;
-            font-size: 16px;
-            text-align: right;
-        }
-        .report-table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: white;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-        .report-table th {
-            background-color: #e9ecef;
-            color: #333;
-            padding: 15px;
-            text-align: right;
-            font-weight: 600;
-            border-bottom: 2px solid #ddd;
-            font-size: 13px;
-        }
-        .report-table td {
-            padding: 12px 15px;
-            text-align: right;
-            border-bottom: 1px solid #eee;
-            font-size: 14px;
-        }
-        .report-table tbody tr:hover {
-            background-color: #f8f9fa;
-        }
-        .report-table tbody tr:last-child td {
-            border-bottom: none;
-        }
-        .invoice-type-sales {
-            background-color: #f0f8f5;
-        }
-        .invoice-type-purchase {
-            background-color: #fffaf0;
-        }
-        .no-data {
-            text-align: center;
-            padding: 40px;
-            color: #999;
-            font-style: italic;
-            background-color: #f8f9fa;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        .settlement-cash {
-            background-color: #d4edda;
-            color: #155724;
-            padding: 3px 8px;
-            border-radius: 3px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-        .settlement-conditional {
-            background-color: #fff3cd;
-            color: #856404;
-            padding: 3px 8px;
-            border-radius: 3px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'css/reports.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -194,7 +18,7 @@
     <div class="report-header">
         <h1>{% trans "گزارش فعالیت کارمند" %}</h1>
         
-        <div class="report-info-row">
+        <div class="report-info-row employee-report">
             <div class="report-info-item">
                 <span class="report-info-label">{% trans "کارمند" %}</span>
                 <span class="report-info-value">{{ report.employee.get_display_name }}</span>
@@ -225,18 +49,18 @@
         </div>
         
         {% if total_salary_amount %}
-        <div class="stats" style="margin-top: 15px;">
+        <div class="stats salary-stats">
             <div class="stat-box">
                 <h3>{% trans "کل حقوق" %}</h3>
-                <div class="number" style="color: #28a745;">{{ total_salary_amount }}</div>
+                <div class="number amount-salary-total">{{ total_salary_amount }}</div>
             </div>
             <div class="stat-box">
                 <h3>{% trans "حقوق پرداخت شده" %}</h3>
-                <div class="number" style="color: #28a745;">{{ paid_salary_amount }}</div>
+                <div class="number amount-salary-paid">{{ paid_salary_amount }}</div>
             </div>
             <div class="stat-box">
                 <h3>{% trans "حقوق معوق" %}</h3>
-                <div class="number" style="color: #dc3545;">{{ unpaid_salary_amount }}</div>
+                <div class="number amount-salary-unpaid">{{ unpaid_salary_amount }}</div>
             </div>
         </div>
         {% endif %}
