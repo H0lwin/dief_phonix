@@ -129,6 +129,11 @@ class CustomUserAdmin(BaseUserAdmin):
     def get_full_name_display(self, obj):
         return obj.get_display_name()
     get_full_name_display.short_description = _('نام کامل')
+    
+    def save_model(self, request, obj, form, change):
+        if obj.role == 'admin':
+            obj.is_staff = True
+        super().save_model(request, obj, form, change)
 
 
 class EmployeeCustomUserAdmin(BaseUserAdmin):

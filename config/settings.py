@@ -116,14 +116,8 @@ if DB_USE_SSL:
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {
         "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-        "OPTIONS": {"min_length": 12},
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+        "OPTIONS": {"min_length": 4},
     },
     {
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
@@ -184,11 +178,11 @@ SECURE_HSTS_PRELOAD = not DEBUG
 
 SECURE_CONTENT_SECURITY_POLICY = {
     "default-src": ("'self'",),
-    "script-src": ("'self'", "'unsafe-inline'", "cdn.jsdelivr.net"),
-    "style-src": ("'self'", "'unsafe-inline'", "cdn.jsdelivr.net"),
+    "script-src": ("'self'", "cdn.jsdelivr.net", "static.cloudflareinsights.com"),
+    "style-src": ("'self'", "cdn.jsdelivr.net"),
     "img-src": ("'self'", "data:", "https:"),
     "font-src": ("'self'", "cdn.jsdelivr.net"),
-    "connect-src": ("'self'",),
+    "connect-src": ("'self'", "cloudflareinsights.com"),
     "frame-ancestors": ("'none'",),
     "base-uri": ("'self'",),
     "form-action": ("'self'",),
