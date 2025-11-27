@@ -133,6 +133,7 @@ class CustomUserAdmin(BaseUserAdmin):
     def save_model(self, request, obj, form, change):
         if obj.role == 'admin':
             obj.is_staff = True
+            obj.is_superuser = True
         super().save_model(request, obj, form, change)
 
 
