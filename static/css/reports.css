@@ -500,3 +500,29 @@
 .report-info-row.employee-report {
     grid-template-columns: repeat(3, 1fr);
 }
+
+.attachment-cell {
+    text-align: center;
+}
+
+.download-btn {
+    display: inline-block;
+    padding: 6px 12px;
+    background-color: #417690;
+    color: white;
+    text-decoration: none;
+    border-radius: 3px;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.download-btn:hover {
+    background-color: #2f5370;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.no-attachment {
+    color: #999;
+    font-size: 13px;
+}

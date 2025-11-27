@@ -93,6 +93,7 @@
                     <th>{% trans "نوع تسویه" %}</th>
                     <th>{% trans "مبلغ" %}</th>
                     <th>{% trans "کاربر ثبت‌کننده" %}</th>
+                    <th>{% trans "فایل پیوست" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -114,6 +115,15 @@
                         <td>{{ invoice.settlement_type }}</td>
                         <td><strong>{{ invoice.price|floatformat:0 }}</strong></td>
                         <td>{{ invoice.created_by }}</td>
+                        <td class="attachment-cell">
+                            {% if invoice.attachment %}
+                                <a href="{% url 'admin:reports_customerreport_download_attachment' invoice_type=invoice.invoice_type_key invoice_id=invoice.id %}" class="download-btn" title="{{ invoice.attachment_name }}">
+                                    📥 {% trans "دانلود" %}
+                                </a>
+                            {% else %}
+                                <span class="no-attachment">{% trans "ندارد" %}</span>
+                            {% endif %}
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>

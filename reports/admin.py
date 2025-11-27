@@ -512,6 +512,11 @@ class CustomerReportAdmin(admin.ModelAdmin):
                 self.admin_site.admin_view(self.api_services_by_category),
                 name='reports_customerreport_api_services',
             ),
+            path(
+                'download-attachment/<str:invoice_type>/<int:invoice_id>/',
+                self.admin_site.admin_view(self.download_attachment),
+                name='reports_customerreport_download_attachment',
+            ),
         ]
         return custom_urls + urls
     
@@ -566,6 +571,8 @@ class CustomerReportAdmin(admin.ModelAdmin):
                 service_obj = self.get_service_object(invoice.service_id, invoice.service_category)
                 invoices.append({
                     'type': _('فروش'),
+                    'invoice_type_key': 'sales',
+                    'id': invoice.id,
                     'invoice_number': invoice.invoice_number,
                     'invoice_date': invoice.invoice_date,
                     'customer_first_name': invoice.buyer.first_name,
@@ -575,6 +582,8 @@ class CustomerReportAdmin(admin.ModelAdmin):
                     'settlement_type': invoice.get_settlement_type_display(),
                     'created_by': invoice.created_by.get_display_name() if invoice.created_by else '-',
                     'price': invoice.sale_price,
+                    'attachment': invoice.attachment if invoice.attachment else None,
+                    'attachment_name': invoice.attachment.name.split('/')[-1] if invoice.attachment else None,
                 })
         
         if report.invoice_type in ['purchase', 'all']:
@@ -582,6 +591,8 @@ class CustomerReportAdmin(admin.ModelAdmin):
                 service_obj = self.get_service_object(invoice.service_id, invoice.service_category)
                 invoices.append({
                     'type': _('خرید'),
+                    'invoice_type_key': 'purchase',
+                    'id': invoice.id,
                     'invoice_number': invoice.invoice_number,
                     'invoice_date': invoice.invoice_date,
                     'customer_first_name': invoice.vendor.first_name,
@@ -591,6 +602,8 @@ class CustomerReportAdmin(admin.ModelAdmin):
                     'settlement_type': invoice.get_settlement_type_display(),
                     'created_by': invoice.created_by.get_display_name() if invoice.created_by else '-',
                     'price': invoice.purchase_price,
+                    'attachment': invoice.attachment if invoice.attachment else None,
+                    'attachment_name': invoice.attachment.name.split('/')[-1] if invoice.attachment else None,
                 })
         
         invoices.sort(key=lambda x: x['invoice_date'], reverse=True)
@@ -701,6 +714,38 @@ class CustomerReportAdmin(admin.ModelAdmin):
             return JsonResponse({'services': list(services)})
         
         return JsonResponse({'services': []})
+    
+    def download_attachment(self, request, invoice_type, invoice_id):
+        from django.http import FileResponse, HttpResponseNotFound
+        from finance.models import SalesInvoice, PurchaseInvoice
+        
+        if invoice_type not in ['sales', 'purchase']:
+            return HttpResponseNotFound('Invalid invoice type')
+        
+        if invoice_type == 'sales':
+            try:
+                invoice = SalesInvoice.objects.get(pk=invoice_id)
+            except SalesInvoice.DoesNotExist:
+                return HttpResponseNotFound('Invoice not found')
+        else:
+            try:
+                invoice = PurchaseInvoice.objects.get(pk=invoice_id)
+            except PurchaseInvoice.DoesNotExist:
+                return HttpResponseNotFound('Invoice not found')
+        
+        if not invoice.attachment:
+            return HttpResponseNotFound('No attachment found')
+        
+        file_path = invoice.attachment.path
+        file_name = invoice.attachment.name.split('/')[-1]
+        
+        try:
+            file_obj = open(file_path, 'rb')
+            response = FileResponse(file_obj)
+            response['Content-Disposition'] = f'attachment; filename="{file_name}"'
+            return response
+        except FileNotFoundError:
+            return HttpResponseNotFound('File not found')
     
     def get_service_object(self, service_id, service_type):
         from services.models import (
