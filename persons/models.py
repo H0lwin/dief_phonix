@@ -1,8 +1,73 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator, FileExtensionValidator
 from django.core.exceptions import ValidationError
 from accounts.models import CustomUser
+
+
+ALLOWED_FILE_EXTENSIONS = [
+    'zip', 'rar', 'pdf', 'xlsx', 'xls', 'doc', 'docx',
+    'jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp',
+    'txt', 'csv', 'json'
+]
+
+ALLOWED_MIME_TYPES = [
+    'application/zip',
+    'application/x-rar-compressed',
+    'application/x-7z-compressed',
+    'application/x-tar',
+    'application/gzip',
+    'application/pdf',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.ms-excel',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'image/jpeg',
+    'image/png',
+    'image/gif',
+    'image/bmp',
+    'image/webp',
+    'text/plain',
+    'text/csv',
+    'application/json',
+]
+
+
+def validate_file_size_100mb(file):
+    file_size = file.size
+    limit_mb = 100
+    if file_size > limit_mb * 1024 * 1024:
+        raise ValidationError(
+            _('حجم فایل نمی‌تواند بیش‌تر از %(limit)s مگابایت باشد. حجم فایل شما: %(size).2f مگابایت') % {
+                'limit': limit_mb,
+                'size': file_size / (1024 * 1024),
+            }
+        )
+
+
+def validate_file_type(file):
+    import mimetypes
+    
+    file_name = file.name.lower()
+    file_ext = file_name.split('.')[-1] if '.' in file_name else ''
+    
+    if file_ext not in ALLOWED_FILE_EXTENSIONS:
+        extensions_list = ', '.join(ALLOWED_FILE_EXTENSIONS)
+        raise ValidationError(
+            _('نوع فایل "%(ext)s" مجاز نیست. فقط این نوع‌های فایل مجاز هستند: %(allowed)s') % {
+                'ext': file_ext.upper(),
+                'allowed': extensions_list,
+            }
+        )
+    
+    if hasattr(file, 'content_type'):
+        mime_type = file.content_type
+        if mime_type and mime_type not in ALLOWED_MIME_TYPES:
+            raise ValidationError(
+                _('نوع MIME فایل "%(mime)s" مجاز نیست.') % {
+                    'mime': mime_type,
+                }
+            )
 
 
 class Person(models.Model):
@@ -147,6 +212,14 @@ class SalesInvoice(models.Model):
         null=True,
         verbose_name=_('توضیحات')
     )
+    attachment = models.FileField(
+        upload_to='sales_invoices/',
+        blank=True,
+        null=True,
+        validators=[validate_file_size_100mb, validate_file_type],
+        verbose_name=_('فایل پیوست'),
+        help_text=_('حداکثر حجم: 100 مگابایت. فایل‌های مجاز: ZIP, RAR, PDF, Excel, Word, تصاویر و فایل‌های متنی')
+    )
     is_active = models.BooleanField(
         default=True,
         verbose_name=_('فعال')
@@ -278,6 +351,14 @@ class PurchaseInvoice(models.Model):
         blank=True,
         null=True,
         verbose_name=_('توضیحات')
+    )
+    attachment = models.FileField(
+        upload_to='purchase_invoices/',
+        blank=True,
+        null=True,
+        validators=[validate_file_size_100mb, validate_file_type],
+        verbose_name=_('فایل پیوست'),
+        help_text=_('حداکثر حجم: 100 مگابایت. فایل‌های مجاز: ZIP, RAR, PDF, Excel, Word, تصاویر و فایل‌های متنی')
     )
     is_active = models.BooleanField(
         default=True,

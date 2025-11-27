@@ -162,11 +162,13 @@ class EmployeeReportAdmin(admin.ModelAdmin):
             'has_change_permission': self.has_change_permission(request),
         }
         
-        return TemplateResponse(
+        response = TemplateResponse(
             request,
             'admin/reports/employee_report_detail.html',
             context,
         )
+        response['Content-Type'] = 'text/html; charset=utf-8'
+        return response
     
     def generate_report_form(self, request):
         if request.method == 'POST':
@@ -197,11 +199,13 @@ class EmployeeReportAdmin(admin.ModelAdmin):
             'opts': self.model._meta,
         }
         
-        return TemplateResponse(
+        response = TemplateResponse(
             request,
             'admin/reports/generate_report_form.html',
             context,
         )
+        response['Content-Type'] = 'text/html; charset=utf-8'
+        return response
 
 
 class FinancialReportAdmin(admin.ModelAdmin):
@@ -348,11 +352,13 @@ class FinancialReportAdmin(admin.ModelAdmin):
             'has_change_permission': self.has_change_permission(request),
         }
         
-        return TemplateResponse(
+        response = TemplateResponse(
             request,
             'admin/reports/financial_report_detail.html',
             context,
         )
+        response['Content-Type'] = 'text/html; charset=utf-8'
+        return response
     
     def generate_report_form(self, request):
         if request.method == 'POST':
@@ -376,11 +382,13 @@ class FinancialReportAdmin(admin.ModelAdmin):
             'opts': self.model._meta,
         }
         
-        return TemplateResponse(
+        response = TemplateResponse(
             request,
             'admin/reports/generate_financial_report_form.html',
             context,
         )
+        response['Content-Type'] = 'text/html; charset=utf-8'
+        return response
 
 
 class CustomerReportAdmin(admin.ModelAdmin):
@@ -599,11 +607,13 @@ class CustomerReportAdmin(admin.ModelAdmin):
             'has_change_permission': self.has_change_permission(request),
         }
         
-        return TemplateResponse(
+        response = TemplateResponse(
             request,
             'admin/reports/customer_report_detail.html',
             context,
         )
+        response['Content-Type'] = 'text/html; charset=utf-8'
+        return response
     
     def generate_report_form(self, request):
         from persons.models import Person
@@ -659,11 +669,13 @@ class CustomerReportAdmin(admin.ModelAdmin):
             'opts': self.model._meta,
         }
         
-        return TemplateResponse(
+        response = TemplateResponse(
             request,
             'admin/reports/generate_customer_report_form.html',
             context,
         )
+        response['Content-Type'] = 'text/html; charset=utf-8'
+        return response
     
     def api_services_by_category(self, request):
         import json
