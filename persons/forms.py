@@ -172,6 +172,8 @@ class SalesInvoiceForm(forms.ModelForm):
         service_id = cleaned_data.get('service_id')
         if service_id and isinstance(service_id, str) and service_id.isdigit():
             cleaned_data['service_id'] = int(service_id)
+        elif not service_id or (isinstance(service_id, str) and service_id == ''):
+            cleaned_data['service_id'] = None
         return cleaned_data
 
 
@@ -272,3 +274,12 @@ class PurchaseInvoiceForm(forms.ModelForm):
                 for service in model.objects.filter(is_active=True).order_by('name'):
                     choices.append((str(service.id), service.name))
             self.fields['service_id'].widget.choices = choices
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        service_id = cleaned_data.get('service_id')
+        if service_id and isinstance(service_id, str) and service_id.isdigit():
+            cleaned_data['service_id'] = int(service_id)
+        elif not service_id or (isinstance(service_id, str) and service_id == ''):
+            cleaned_data['service_id'] = None
+        return cleaned_data
