@@ -217,7 +217,7 @@ admin.site.register(CustomUser, CustomUserAdmin)
 class OwnedAdminMixin:
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        if request.user.role == 'admin' or request.user.is_superuser:
+        if request.user.is_superuser or (hasattr(request.user, 'role') and request.user.role == 'admin'):
             return qs
         return qs.filter(created_by=request.user)
 
@@ -226,17 +226,33 @@ class OwnedAdminMixin:
             obj.created_by = request.user
         super().save_model(request, obj, form, change)
 
+    def has_module_permission(self, request):
+        if hasattr(request.user, 'role') and request.user.role == 'user':
+            return True
+        return super().has_module_permission(request)
+
     def has_view_permission(self, request, obj=None):
-        if obj and request.user.role != 'admin' and not request.user.is_superuser and obj.created_by != request.user:
-            return False
+        if hasattr(request.user, 'role') and request.user.role == 'user':
+            if obj is None:
+                return True
+            return obj.created_by == request.user
         return super().has_view_permission(request, obj)
 
     def has_change_permission(self, request, obj=None):
-        if obj and request.user.role != 'admin' and not request.user.is_superuser and obj.created_by != request.user:
-            return False
+        if hasattr(request.user, 'role') and request.user.role == 'user':
+            if obj is None:
+                return True
+            return obj.created_by == request.user
         return super().has_change_permission(request, obj)
 
     def has_delete_permission(self, request, obj=None):
-        if obj and request.user.role != 'admin' and not request.user.is_superuser and obj.created_by != request.user:
-            return False
+        if hasattr(request.user, 'role') and request.user.role == 'user':
+            if obj is None:
+                return True
+            return obj.created_by == request.user
         return super().has_delete_permission(request, obj)
+
+    def has_add_permission(self, request):
+        if hasattr(request.user, 'role') and request.user.role == 'user':
+            return True
+        return super().has_add_permission(request)
