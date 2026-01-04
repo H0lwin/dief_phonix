@@ -25,7 +25,7 @@ class CustomerReportForm(forms.ModelForm):
             'start_date',
             'end_date',
             'single_date',
-            'created_by',
+            'filter_user',
         ]
         widgets = {
             'customer': forms.Select(attrs={
@@ -63,7 +63,7 @@ class CustomerReportForm(forms.ModelForm):
                 'id': 'id_single_date',
                 'style': 'display: none;',
             }),
-            'created_by': forms.Select(attrs={
+            'filter_user': forms.Select(attrs={
                 'class': 'form-control',
             }),
         }
@@ -76,7 +76,7 @@ class CustomerReportForm(forms.ModelForm):
             'start_date': _('تاریخ شروع'),
             'end_date': _('تاریخ پایان'),
             'single_date': _('تاریخ'),
-            'created_by': _('کاربر ثبت‌کننده'),
+            'filter_user': _('کاربر ثبت‌کننده'),
         }
     
     def __init__(self, *args, **kwargs):
@@ -90,6 +90,6 @@ class CustomerReportForm(forms.ModelForm):
         self.fields['customer'].queryset = Person.objects.filter(is_active=True)
         
         # Filter active users only
-        self.fields['created_by'].required = False
-        self.fields['created_by'].empty_label = _('تمام کاربران')
-        self.fields['created_by'].queryset = CustomUser.objects.filter(is_active=True)
+        self.fields['filter_user'].required = False
+        self.fields['filter_user'].empty_label = _('تمام کاربران')
+        self.fields['filter_user'].queryset = CustomUser.objects.filter(is_active=True)

@@ -4,11 +4,11 @@ from django.db.models import Q
 from django.forms import ModelChoiceField
 from .models import Person, SalesInvoice, PurchaseInvoice
 from .forms import SalesInvoiceForm, PurchaseInvoiceForm
-from accounts.admin import employee_admin_site
+from accounts.admin import employee_admin_site, OwnedAdminMixin
 import json
 
 
-class PersonAdmin(admin.ModelAdmin):
+class PersonAdmin(OwnedAdminMixin, admin.ModelAdmin):
     list_display = [
         'get_full_name',
         'national_id',
@@ -76,7 +76,7 @@ class PersonAdmin(admin.ModelAdmin):
     get_full_name.short_description = _('نام کامل')
 
 
-class SalesInvoiceAdmin(admin.ModelAdmin):
+class SalesInvoiceAdmin(OwnedAdminMixin, admin.ModelAdmin):
     form = SalesInvoiceForm
     
     list_display = [
@@ -168,11 +168,6 @@ class SalesInvoiceAdmin(admin.ModelAdmin):
             kwargs['queryset'] = Person.objects.filter(is_active=True)
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
     
-    def save_model(self, request, obj, form, change):
-        if not change:
-            obj.created_by = request.user
-        super().save_model(request, obj, form, change)
-    
     def get_buyer_name(self, obj):
         return obj.buyer.get_full_name()
     get_buyer_name.short_description = _('خریدار')
@@ -185,7 +180,7 @@ class SalesInvoiceAdmin(admin.ModelAdmin):
     get_service_display.short_description = _('خدمت')
 
 
-class EmployeePersonAdmin(admin.ModelAdmin):
+class EmployeePersonAdmin(OwnedAdminMixin, admin.ModelAdmin):
     list_display = [
         'get_full_name',
         'national_id',
@@ -236,27 +231,12 @@ class EmployeePersonAdmin(admin.ModelAdmin):
     
     ordering = ['-created_at']
     
-    def has_module_permission(self, request):
-        return True
-    
-    def has_view_permission(self, request, obj=None):
-        return True
-    
-    def has_add_permission(self, request):
-        return True
-    
-    def has_change_permission(self, request, obj=None):
-        return True
-    
-    def has_delete_permission(self, request, obj=None):
-        return True
-    
     def get_full_name(self, obj):
         return obj.get_full_name()
     get_full_name.short_description = _('نام کامل')
 
 
-class EmployeeSalesInvoiceAdmin(admin.ModelAdmin):
+class EmployeeSalesInvoiceAdmin(OwnedAdminMixin, admin.ModelAdmin):
     form = SalesInvoiceForm
     
     list_display = [
@@ -324,26 +304,6 @@ class EmployeeSalesInvoiceAdmin(admin.ModelAdmin):
             'js/sales_invoice_admin.js',
         )
     
-    def has_module_permission(self, request):
-        return True
-    
-    def has_view_permission(self, request, obj=None):
-        return True
-    
-    def has_add_permission(self, request):
-        return True
-    
-    def has_change_permission(self, request, obj=None):
-        return True
-    
-    def has_delete_permission(self, request, obj=None):
-        return True
-    
-    def save_model(self, request, obj, form, change):
-        if not change:
-            obj.created_by = request.user
-        super().save_model(request, obj, form, change)
-    
     def get_buyer_name(self, obj):
         return obj.buyer.get_full_name()
     get_buyer_name.short_description = _('خریدار')
@@ -356,7 +316,7 @@ class EmployeeSalesInvoiceAdmin(admin.ModelAdmin):
     get_service_display.short_description = _('خدمت')
 
 
-class PurchaseInvoiceAdmin(admin.ModelAdmin):
+class PurchaseInvoiceAdmin(OwnedAdminMixin, admin.ModelAdmin):
     form = PurchaseInvoiceForm
     
     list_display = [
@@ -444,11 +404,6 @@ class PurchaseInvoiceAdmin(admin.ModelAdmin):
             kwargs['queryset'] = Person.objects.filter(is_active=True)
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
     
-    def save_model(self, request, obj, form, change):
-        if not change:
-            obj.created_by = request.user
-        super().save_model(request, obj, form, change)
-    
     def get_vendor_name(self, obj):
         return obj.vendor.get_full_name()
     get_vendor_name.short_description = _('فروشنده')
@@ -461,7 +416,7 @@ class PurchaseInvoiceAdmin(admin.ModelAdmin):
     get_service_display.short_description = _('خدمت')
 
 
-class EmployeePurchaseInvoiceAdmin(admin.ModelAdmin):
+class EmployeePurchaseInvoiceAdmin(OwnedAdminMixin, admin.ModelAdmin):
     form = PurchaseInvoiceForm
     
     list_display = [
@@ -528,26 +483,6 @@ class EmployeePurchaseInvoiceAdmin(admin.ModelAdmin):
             'js/service_modal.js',
             'js/purchase_invoice_admin.js',
         )
-    
-    def has_module_permission(self, request):
-        return True
-    
-    def has_view_permission(self, request, obj=None):
-        return True
-    
-    def has_add_permission(self, request):
-        return True
-    
-    def has_change_permission(self, request, obj=None):
-        return True
-    
-    def has_delete_permission(self, request, obj=None):
-        return True
-    
-    def save_model(self, request, obj, form, change):
-        if not change:
-            obj.created_by = request.user
-        super().save_model(request, obj, form, change)
     
     def get_vendor_name(self, obj):
         return obj.vendor.get_full_name()

@@ -1,10 +1,10 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 from .models import ExpenseInvoice, IncomeInvoice, Salary
-from accounts.admin import employee_admin_site
+from accounts.admin import employee_admin_site, OwnedAdminMixin
 
 
-class ExpenseInvoiceAdmin(admin.ModelAdmin):
+class ExpenseInvoiceAdmin(OwnedAdminMixin, admin.ModelAdmin):
     list_display = [
         'invoice_number',
         'amount',
@@ -57,7 +57,7 @@ class ExpenseInvoiceAdmin(admin.ModelAdmin):
     ordering = ['-date', '-invoice_number']
 
 
-class IncomeInvoiceAdmin(admin.ModelAdmin):
+class IncomeInvoiceAdmin(OwnedAdminMixin, admin.ModelAdmin):
     list_display = [
         'invoice_number',
         'amount',
@@ -110,7 +110,7 @@ class IncomeInvoiceAdmin(admin.ModelAdmin):
     ordering = ['-date', '-invoice_number']
 
 
-class EmployeeExpenseInvoiceAdmin(admin.ModelAdmin):
+class EmployeeExpenseInvoiceAdmin(OwnedAdminMixin, admin.ModelAdmin):
     list_display = [
         'invoice_number',
         'amount',
@@ -150,24 +150,9 @@ class EmployeeExpenseInvoiceAdmin(admin.ModelAdmin):
     ]
     
     ordering = ['-date', '-invoice_number']
-    
-    def has_module_permission(self, request):
-        return True
-    
-    def has_view_permission(self, request, obj=None):
-        return True
-    
-    def has_add_permission(self, request):
-        return True
-    
-    def has_change_permission(self, request, obj=None):
-        return True
-    
-    def has_delete_permission(self, request, obj=None):
-        return True
 
 
-class EmployeeIncomeInvoiceAdmin(admin.ModelAdmin):
+class EmployeeIncomeInvoiceAdmin(OwnedAdminMixin, admin.ModelAdmin):
     list_display = [
         'invoice_number',
         'amount',
@@ -207,24 +192,9 @@ class EmployeeIncomeInvoiceAdmin(admin.ModelAdmin):
     ]
     
     ordering = ['-date', '-invoice_number']
-    
-    def has_module_permission(self, request):
-        return True
-    
-    def has_view_permission(self, request, obj=None):
-        return True
-    
-    def has_add_permission(self, request):
-        return True
-    
-    def has_change_permission(self, request, obj=None):
-        return True
-    
-    def has_delete_permission(self, request, obj=None):
-        return True
 
 
-class SalaryAdmin(admin.ModelAdmin):
+class SalaryAdmin(OwnedAdminMixin, admin.ModelAdmin):
     list_display = [
         'get_employee_name',
         'date',

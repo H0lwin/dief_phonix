@@ -38,7 +38,7 @@ def generate_customer_report(request):
         form = CustomerReportForm(request.POST)
         if form.is_valid():
             report = form.save(commit=False)
-            report.generated_by = request.user
+            report.created_by = request.user
             report.save()
             return redirect('reports:customer_report_detail', pk=report.id)
     else:
@@ -53,11 +53,21 @@ def generate_customer_report(request):
 
 @login_required
 def customer_report_detail(request, pk):
-    report = CustomerReport.objects.get(id=pk)
+    from django.core.exceptions import PermissionDenied
+    from django.shortcuts import get_object_or_404
+    report = get_object_or_404(CustomerReport, id=pk)
+    
+    if request.user.role != 'admin' and not request.user.is_superuser and report.created_by != request.user:
+        raise PermissionDenied
     
     # Build query for SalesInvoice
     sales_query = SalesInvoice.objects.all()
     purchase_query = PurchaseInvoice.objects.all()
+    
+    # Enforce ownership
+    if request.user.role != 'admin' and not request.user.is_superuser:
+        sales_query = sales_query.filter(created_by=request.user)
+        purchase_query = purchase_query.filter(created_by=request.user)
     
     # Filter by customer
     if report.customer:
@@ -94,9 +104,9 @@ def customer_report_detail(request, pk):
         )
     
     # Filter by created_by (user who registered the invoice)
-    if report.created_by:
-        sales_query = sales_query.filter(created_by=report.created_by)
-        purchase_query = purchase_query.filter(created_by=report.created_by)
+    if report.filter_user:
+        sales_query = sales_query.filter(created_by=report.filter_user)
+        purchase_query = purchase_query.filter(created_by=report.filter_user)
     
     # Build combined results
     invoices = []

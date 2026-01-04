@@ -212,3 +212,31 @@ class EmployeeCustomUserAdmin(BaseUserAdmin):
 
 
 admin.site.register(CustomUser, CustomUserAdmin)
+
+
+class OwnedAdminMixin:
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.role == 'admin' or request.user.is_superuser:
+            return qs
+        return qs.filter(created_by=request.user)
+
+    def save_model(self, request, obj, form, change):
+        if not obj.pk:
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
+
+    def has_view_permission(self, request, obj=None):
+        if obj and request.user.role != 'admin' and not request.user.is_superuser and obj.created_by != request.user:
+            return False
+        return super().has_view_permission(request, obj)
+
+    def has_change_permission(self, request, obj=None):
+        if obj and request.user.role != 'admin' and not request.user.is_superuser and obj.created_by != request.user:
+            return False
+        return super().has_change_permission(request, obj)
+
+    def has_delete_permission(self, request, obj=None):
+        if obj and request.user.role != 'admin' and not request.user.is_superuser and obj.created_by != request.user:
+            return False
+        return super().has_delete_permission(request, obj)

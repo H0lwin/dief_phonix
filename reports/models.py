@@ -1,10 +1,10 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from accounts.models import CustomUser
+from accounts.models import CustomUser, OwnedModel
 from persons.models import Person
 
 
-class EmployeeReport(models.Model):
+class EmployeeReport(OwnedModel):
     employee = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
@@ -16,13 +16,6 @@ class EmployeeReport(models.Model):
     )
     end_date = models.DateField(
         verbose_name=_('تاریخ پایان')
-    )
-    generated_by = models.ForeignKey(
-        CustomUser,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name='reports_generated',
-        verbose_name=_('تولید شده توسط')
     )
     created_at = models.DateTimeField(
         auto_now_add=True,
@@ -42,19 +35,12 @@ class EmployeeReport(models.Model):
         return f"گزارش {self.employee.get_display_name()} ({self.start_date} تا {self.end_date})"
 
 
-class FinancialReport(models.Model):
+class FinancialReport(OwnedModel):
     start_date = models.DateField(
         verbose_name=_('تاریخ شروع')
     )
     end_date = models.DateField(
         verbose_name=_('تاریخ پایان')
-    )
-    generated_by = models.ForeignKey(
-        CustomUser,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name='financial_reports_generated',
-        verbose_name=_('تولید شده توسط')
     )
     created_at = models.DateTimeField(
         auto_now_add=True,
@@ -74,7 +60,7 @@ class FinancialReport(models.Model):
         return f"گزارش مالی ({self.start_date} تا {self.end_date})"
 
 
-class CustomerReport(models.Model):
+class CustomerReport(OwnedModel):
     INVOICE_TYPE_CHOICES = [
         ('all', _('هر دو')),
         ('sales', _('فقط فاکتور فروش')),
@@ -151,26 +137,18 @@ class CustomerReport(models.Model):
         verbose_name=_('تاریخ واحد')
     )
     
-    created_by = models.ForeignKey(
+    filter_user = models.ForeignKey(
         CustomUser,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='customer_reports_generated',
+        related_name='customer_reports_filtered',
         verbose_name=_('کاربر ثبت‌کننده برای فیلتر')
     )
     
     generated_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name=_('تاریخ تولید گزارش')
-    )
-    
-    generated_by = models.ForeignKey(
-        CustomUser,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name='generated_customer_reports',
-        verbose_name=_('تولید شده توسط')
     )
     
     class Meta:

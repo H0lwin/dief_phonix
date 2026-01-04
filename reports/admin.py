@@ -15,7 +15,10 @@ from finance.models import Salary
 from accounts.models import CustomUser
 
 
-class EmployeeReportAdmin(admin.ModelAdmin):
+from accounts.admin import OwnedAdminMixin
+
+
+class EmployeeReportAdmin(OwnedAdminMixin, admin.ModelAdmin):
     list_display = [
         'get_employee_name',
         'start_date',
@@ -50,7 +53,7 @@ class EmployeeReportAdmin(admin.ModelAdmin):
         }),
         (_('اطلاعات تولید'), {
             'fields': (
-                'generated_by',
+                'created_by',
                 'created_at',
             ),
             'classes': ('collapse',)
@@ -58,7 +61,7 @@ class EmployeeReportAdmin(admin.ModelAdmin):
     )
     
     readonly_fields = [
-        'generated_by',
+        'created_by',
         'created_at',
     ]
     
@@ -90,11 +93,6 @@ class EmployeeReportAdmin(admin.ModelAdmin):
             _('مشاهده گزارش')
         )
     view_details_link.short_description = _('گزارش')
-    
-    def save_model(self, request, obj, form, change):
-        if not change:
-            obj.generated_by = request.user
-        super().save_model(request, obj, form, change)
     
     def changelist_view(self, request, extra_context=None):
         extra_context = extra_context or {}
@@ -183,7 +181,7 @@ class EmployeeReportAdmin(admin.ModelAdmin):
                         employee=employee,
                         start_date=start_date,
                         end_date=end_date,
-                        generated_by=request.user
+                        created_by=request.user
                     )
                     report_url = reverse('admin:reports_employeereport_view_employee_report', args=[report.id])
                     return redirect(report_url)
@@ -208,7 +206,7 @@ class EmployeeReportAdmin(admin.ModelAdmin):
         return response
 
 
-class FinancialReportAdmin(admin.ModelAdmin):
+class FinancialReportAdmin(OwnedAdminMixin, admin.ModelAdmin):
     list_display = [
         'date_range',
         'get_total_income',
@@ -231,7 +229,7 @@ class FinancialReportAdmin(admin.ModelAdmin):
         }),
         (_('اطلاعات تولید'), {
             'fields': (
-                'generated_by',
+                'created_by',
                 'created_at',
             ),
             'classes': ('collapse',)
@@ -239,7 +237,7 @@ class FinancialReportAdmin(admin.ModelAdmin):
     )
     
     readonly_fields = [
-        'generated_by',
+        'created_by',
         'created_at',
     ]
     
@@ -288,11 +286,6 @@ class FinancialReportAdmin(admin.ModelAdmin):
             _('مشاهده گزارش')
         )
     view_details_link.short_description = _('گزارش')
-    
-    def save_model(self, request, obj, form, change):
-        if not change:
-            obj.generated_by = request.user
-        super().save_model(request, obj, form, change)
     
     def changelist_view(self, request, extra_context=None):
         extra_context = extra_context or {}
@@ -370,7 +363,7 @@ class FinancialReportAdmin(admin.ModelAdmin):
                     report = FinancialReport.objects.create(
                         start_date=start_date,
                         end_date=end_date,
-                        generated_by=request.user
+                        created_by=request.user
                     )
                     report_url = reverse('admin:reports_financialreport_view_financial_report', args=[report.id])
                     return redirect(report_url)
@@ -391,7 +384,7 @@ class FinancialReportAdmin(admin.ModelAdmin):
         return response
 
 
-class CustomerReportAdmin(admin.ModelAdmin):
+class CustomerReportAdmin(OwnedAdminMixin, admin.ModelAdmin):
     list_display = [
         'get_customer_name',
         'service_category',
@@ -442,12 +435,12 @@ class CustomerReportAdmin(admin.ModelAdmin):
         }),
         (_('فیلتر کاربر'), {
             'fields': (
-                'created_by',
+                'filter_user',
             )
         }),
         (_('اطلاعات تولید'), {
             'fields': (
-                'generated_by',
+                'created_by',
                 'generated_at',
             ),
             'classes': ('collapse',)
@@ -455,7 +448,7 @@ class CustomerReportAdmin(admin.ModelAdmin):
     )
     
     readonly_fields = [
-        'generated_by',
+        'created_by',
         'generated_at',
     ]
     
@@ -477,11 +470,6 @@ class CustomerReportAdmin(admin.ModelAdmin):
             _('مشاهده گزارش')
         )
     view_details_link.short_description = _('نمایش')
-    
-    def save_model(self, request, obj, form, change):
-        if not change:
-            obj.generated_by = request.user
-        super().save_model(request, obj, form, change)
     
     def changelist_view(self, request, extra_context=None):
         extra_context = extra_context or {}
@@ -560,9 +548,9 @@ class CustomerReportAdmin(admin.ModelAdmin):
                 invoice_date__lte=report.end_date
             )
         
-        if report.created_by:
-            sales_query = sales_query.filter(created_by=report.created_by)
-            purchase_query = purchase_query.filter(created_by=report.created_by)
+        if report.filter_user:
+            sales_query = sales_query.filter(created_by=report.filter_user)
+            purchase_query = purchase_query.filter(created_by=report.filter_user)
         
         invoices = []
         
@@ -640,16 +628,16 @@ class CustomerReportAdmin(admin.ModelAdmin):
             single_date = request.POST.get('single_date')
             start_date = request.POST.get('start_date')
             end_date = request.POST.get('end_date')
-            created_by_id = request.POST.get('created_by')
+            filter_user_id = request.POST.get('filter_user')
             
             try:
                 customer = None
                 if customer_id:
                     customer = Person.objects.get(pk=customer_id)
                 
-                created_by = None
-                if created_by_id:
-                    created_by = CustomUser.objects.get(pk=created_by_id)
+                filter_user = None
+                if filter_user_id:
+                    filter_user = CustomUser.objects.get(pk=filter_user_id)
                 
                 report_data = {
                     'customer': customer,
@@ -660,8 +648,8 @@ class CustomerReportAdmin(admin.ModelAdmin):
                     'single_date': single_date if single_date else None,
                     'start_date': start_date if start_date else None,
                     'end_date': end_date if end_date else None,
-                    'created_by': created_by,
-                    'generated_by': request.user,
+                    'filter_user': filter_user,
+                    'created_by': request.user,
                 }
                 
                 report = CustomerReport.objects.create(**report_data)

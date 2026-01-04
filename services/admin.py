@@ -1,9 +1,10 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 from .models import LegalService, CommercialService, LeasingService, LoanService, RegistrationService
+from accounts.admin import OwnedAdminMixin
 
 
-class LegalServiceAdmin(admin.ModelAdmin):
+class LegalServiceAdmin(OwnedAdminMixin, admin.ModelAdmin):
     list_display = [
         'name',
         'is_active',
@@ -44,7 +45,7 @@ class LegalServiceAdmin(admin.ModelAdmin):
     ordering = ['name']
 
 
-class CommercialServiceAdmin(admin.ModelAdmin):
+class CommercialServiceAdmin(OwnedAdminMixin, admin.ModelAdmin):
     list_display = [
         'name',
         'is_active',
@@ -85,7 +86,7 @@ class CommercialServiceAdmin(admin.ModelAdmin):
     ordering = ['name']
 
 
-class LeasingServiceAdmin(admin.ModelAdmin):
+class LeasingServiceAdmin(OwnedAdminMixin, admin.ModelAdmin):
     list_display = [
         'name',
         'is_active',
@@ -126,7 +127,7 @@ class LeasingServiceAdmin(admin.ModelAdmin):
     ordering = ['name']
 
 
-class LoanServiceAdmin(admin.ModelAdmin):
+class LoanServiceAdmin(OwnedAdminMixin, admin.ModelAdmin):
     list_display = [
         'bank_name',
         'plan_name',
@@ -183,7 +184,7 @@ class LoanServiceAdmin(admin.ModelAdmin):
     ordering = ['bank_name', 'plan_name']
 
 
-class RegistrationServiceAdmin(admin.ModelAdmin):
+class RegistrationServiceAdmin(OwnedAdminMixin, admin.ModelAdmin):
     list_display = [
         'name',
         'is_active',

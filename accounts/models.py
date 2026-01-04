@@ -134,4 +134,20 @@ class CustomUser(AbstractUser):
         return self.username
 
 
+from django.conf import settings
+
+
+class OwnedModel(models.Model):
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        verbose_name=_('ایجاد شده توسط'),
+        null=True,
+        blank=True
+    )
+
+    class Meta:
+        abstract = True
+
+
 

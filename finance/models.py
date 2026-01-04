@@ -1,8 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
-from accounts.models import CustomUser
-import os
+from accounts.models import CustomUser, OwnedModel
 
 
 class InvoiceNumberMixin:
@@ -14,7 +13,7 @@ class InvoiceNumberMixin:
         return 1000
 
 
-class ExpenseInvoice(models.Model):
+class ExpenseInvoice(OwnedModel):
     invoice_number = models.PositiveIntegerField(
         unique=True,
         verbose_name=_('شماره فاکتور'),
@@ -71,7 +70,7 @@ class ExpenseInvoice(models.Model):
         super().save(*args, **kwargs)
 
 
-class IncomeInvoice(models.Model):
+class IncomeInvoice(OwnedModel):
     invoice_number = models.PositiveIntegerField(
         unique=True,
         verbose_name=_('شماره فاکتور'),
@@ -128,7 +127,7 @@ class IncomeInvoice(models.Model):
         super().save(*args, **kwargs)
 
 
-class Salary(models.Model):
+class Salary(OwnedModel):
     employee = models.ForeignKey(
         CustomUser,
         on_delete=models.PROTECT,

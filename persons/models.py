@@ -2,7 +2,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import RegexValidator, FileExtensionValidator
 from django.core.exceptions import ValidationError
-from accounts.models import CustomUser
+from accounts.models import CustomUser, OwnedModel
 
 
 ALLOWED_FILE_EXTENSIONS = [
@@ -70,7 +70,7 @@ def validate_file_type(file):
             )
 
 
-class Person(models.Model):
+class Person(OwnedModel):
     first_name = models.CharField(
         max_length=200,
         verbose_name=_('نام')
@@ -144,7 +144,7 @@ class Person(models.Model):
         return f"{self.first_name} {self.last_name}"
 
 
-class SalesInvoice(models.Model):
+class SalesInvoice(OwnedModel):
     SERVICE_TYPE_CHOICES = [
         ('commercial', _('خدمات بازرگانی')),
         ('registration', _('خدمات ثبت')),
@@ -163,14 +163,6 @@ class SalesInvoice(models.Model):
         on_delete=models.PROTECT,
         related_name='invoices',
         verbose_name=_('خریدار')
-    )
-    created_by = models.ForeignKey(
-        CustomUser,
-        on_delete=models.PROTECT,
-        related_name='sales_invoices',
-        verbose_name=_('کاربر ثبت کننده'),
-        null=True,
-        blank=True
     )
     invoice_number = models.PositiveIntegerField(
         unique=True,
@@ -284,7 +276,7 @@ class SalesInvoice(models.Model):
         return None
 
 
-class PurchaseInvoice(models.Model):
+class PurchaseInvoice(OwnedModel):
     SERVICE_TYPE_CHOICES = [
         ('commercial', _('خدمات بازرگانی')),
         ('registration', _('خدمات ثبت')),
@@ -303,14 +295,6 @@ class PurchaseInvoice(models.Model):
         on_delete=models.PROTECT,
         related_name='purchase_invoices',
         verbose_name=_('فروشنده')
-    )
-    created_by = models.ForeignKey(
-        CustomUser,
-        on_delete=models.PROTECT,
-        related_name='purchase_invoices',
-        verbose_name=_('کاربر ثبت کننده'),
-        null=True,
-        blank=True
     )
     invoice_number = models.PositiveIntegerField(
         unique=True,

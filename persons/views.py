@@ -41,13 +41,15 @@ def get_services_by_category(request):
         if not model:
             return JsonResponse({'error': 'Invalid service_type'}, status=400)
         
+        queryset = model.objects.filter(is_active=True)
+        if request.user.role != 'admin' and not request.user.is_superuser:
+            queryset = queryset.filter(created_by=request.user)
+            
         if service_type == 'loan':
-            services_qs = model.objects.filter(is_active=True).order_by('bank_name', 'plan_name')
+            services_qs = queryset.order_by('bank_name', 'plan_name')
             services = [{'id': s.id, 'name': str(s)} for s in services_qs]
         else:
-            services = list(model.objects.filter(
-                is_active=True
-            ).values('id', 'name').order_by('name'))
+            services = list(queryset.values('id', 'name').order_by('name'))
         
         return JsonResponse({
             'success': True,
@@ -68,9 +70,11 @@ def search_persons(request):
         return JsonResponse({'error': 'Authentication required'}, status=401)
     
     try:
-        persons = Person.objects.filter(
-            is_active=True
-        ).filter(
+        queryset = Person.objects.filter(is_active=True)
+        if request.user.role != 'admin' and not request.user.is_superuser:
+            queryset = queryset.filter(created_by=request.user)
+            
+        persons = queryset.filter(
             Q(first_name__icontains=query) |
             Q(last_name__icontains=query) |
             Q(national_id__icontains=query) |
