@@ -304,6 +304,14 @@ class EmployeeSalesInvoiceAdmin(OwnedAdminMixin, admin.ModelAdmin):
             'js/sales_invoice_admin.js',
         )
     
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'buyer':
+            if not request.user.is_superuser and (hasattr(request.user, 'role') and request.user.role != 'admin'):
+                kwargs['queryset'] = Person.objects.filter(created_by=request.user, is_active=True)
+            else:
+                kwargs['queryset'] = Person.objects.filter(is_active=True)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
     def get_buyer_name(self, obj):
         return obj.buyer.get_full_name()
     get_buyer_name.short_description = _('خریدار')
@@ -484,6 +492,14 @@ class EmployeePurchaseInvoiceAdmin(OwnedAdminMixin, admin.ModelAdmin):
             'js/purchase_invoice_admin.js',
         )
     
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'vendor':
+            if not request.user.is_superuser and (hasattr(request.user, 'role') and request.user.role != 'admin'):
+                kwargs['queryset'] = Person.objects.filter(created_by=request.user, is_active=True)
+            else:
+                kwargs['queryset'] = Person.objects.filter(is_active=True)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
     def get_vendor_name(self, obj):
         return obj.vendor.get_full_name()
     get_vendor_name.short_description = _('فروشنده')
@@ -502,3 +518,4 @@ admin.site.register(PurchaseInvoice, PurchaseInvoiceAdmin)
 
 employee_admin_site.register(Person, EmployeePersonAdmin)
 employee_admin_site.register(SalesInvoice, EmployeeSalesInvoiceAdmin)
+employee_admin_site.register(PurchaseInvoice, EmployeePurchaseInvoiceAdmin)
