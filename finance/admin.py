@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 from .models import ExpenseInvoice, IncomeInvoice, Salary
-from accounts.admin import OwnedAdminMixin
+from accounts.admin import OwnedAdminMixin, employee_admin_site
 
 
 class ExpenseInvoiceAdmin(OwnedAdminMixin, admin.ModelAdmin):
@@ -258,3 +258,6 @@ class SalaryAdmin(OwnedAdminMixin, admin.ModelAdmin):
 admin.site.register(ExpenseInvoice, ExpenseInvoiceAdmin)
 admin.site.register(IncomeInvoice, IncomeInvoiceAdmin)
 admin.site.register(Salary, SalaryAdmin)
+
+employee_admin_site.register(ExpenseInvoice, EmployeeExpenseInvoiceAdmin)
+employee_admin_site.register(IncomeInvoice, EmployeeIncomeInvoiceAdmin)
