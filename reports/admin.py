@@ -15,7 +15,7 @@ from finance.models import Salary
 from accounts.models import CustomUser
 
 
-from accounts.admin import OwnedAdminMixin, employee_admin_site
+from accounts.admin import OwnedAdminMixin
 
 
 class EmployeeReportAdmin(OwnedAdminMixin, admin.ModelAdmin):
@@ -764,7 +764,3 @@ class CustomerReportAdmin(OwnedAdminMixin, admin.ModelAdmin):
 admin.site.register(EmployeeReport, EmployeeReportAdmin)
 admin.site.register(FinancialReport, FinancialReportAdmin)
 admin.site.register(CustomerReport, CustomerReportAdmin)
-
-employee_admin_site.register(EmployeeReport, EmployeeReportAdmin)
-employee_admin_site.register(FinancialReport, FinancialReportAdmin)
-employee_admin_site.register(CustomerReport, CustomerReportAdmin)

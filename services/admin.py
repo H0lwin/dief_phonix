@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 from .models import LegalService, CommercialService, LeasingService, LoanService, RegistrationService
-from accounts.admin import OwnedAdminMixin, employee_admin_site
+from accounts.admin import OwnedAdminMixin
 
 
 class LegalServiceAdmin(OwnedAdminMixin, admin.ModelAdmin):
@@ -230,9 +230,3 @@ admin.site.register(CommercialService, CommercialServiceAdmin)
 admin.site.register(LeasingService, LeasingServiceAdmin)
 admin.site.register(LoanService, LoanServiceAdmin)
 admin.site.register(RegistrationService, RegistrationServiceAdmin)
-
-employee_admin_site.register(LegalService, LegalServiceAdmin)
-employee_admin_site.register(CommercialService, CommercialServiceAdmin)
-employee_admin_site.register(LeasingService, LeasingServiceAdmin)
-employee_admin_site.register(LoanService, LoanServiceAdmin)
-employee_admin_site.register(RegistrationService, RegistrationServiceAdmin)

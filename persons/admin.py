@@ -502,4 +502,3 @@ admin.site.register(PurchaseInvoice, PurchaseInvoiceAdmin)
 
 employee_admin_site.register(Person, EmployeePersonAdmin)
 employee_admin_site.register(SalesInvoice, EmployeeSalesInvoiceAdmin)
-employee_admin_site.register(PurchaseInvoice, EmployeePurchaseInvoiceAdmin)
